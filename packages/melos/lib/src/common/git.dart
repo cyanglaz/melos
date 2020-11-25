@@ -122,17 +122,23 @@ Future<String> gitLatestTagForPackage(MelosPackage package,
 
 Future<void> gitAdd(String filePattern, {String workingDirectory}) async {
   List<String> gitArgs = ['add', filePattern];
-  await Process.run('git', gitArgs,
+  ProcessResult result = await Process.run('git', gitArgs,
       workingDirectory: workingDirectory ?? Directory.current.path);
-  // TODO validate added?
+  if (result.exitCode != 0) {
+    logger.stderr('[GIT]: git add failed with error:\n${result.stderr}');
+    exit(2);
+  }
 }
 
 Future<void> gitCommit(String message, {String workingDirectory}) async {
   // TODO validate has staged changes?
   List<String> gitArgs = ['commit', '-m', message];
-  await Process.run('git', gitArgs,
+  ProcessResult result = await Process.run('git', gitArgs,
       workingDirectory: workingDirectory ?? Directory.current.path);
-  // TODO validate committed?
+  if (result.exitCode != 0) {
+    logger.stderr('[GIT]: git commit failed with error:\n${result.stderr}');
+    exit(2);
+  }
 }
 
 /// Returns a list of [GitCommit]s for a Melos package.
